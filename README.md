@@ -1,6 +1,7 @@
 GE Calc ![Plugin Installs](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/gecalc) ![Plugin Rank](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/gecalc)
 ------
-NOTE: This was a personal project, and probably won't receive any further updates. Feel free to fork and modify the repo.
+| NOTE: This was a personal project, and probably won't receive any further updates. Feel free to fork and modify the repo.
+| --- |
 
 A [Runelite](https://github.com/runelite/runelite) plugin that add the ability to use math/s to set price and quantity in the Grans Exchange window, and enabled the entry of decimal values when using the k, m, and b unit identifiers. See usage below.
 
