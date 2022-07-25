@@ -1,15 +1,14 @@
 package com.gecalc;
 
+
+import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
 import net.runelite.client.input.KeyListener;
 
-import java.awt.event.KeyEvent;
-
-import lombok.extern.slf4j.Slf4j;
-
 import javax.inject.Inject;
+import java.awt.event.KeyEvent;
 
 @Slf4j
 class GECalcKeyHandler implements KeyListener {
@@ -35,7 +34,7 @@ class GECalcKeyHandler implements KeyListener {
         Figure out of user has entered a quantity into the GE quantity or price input.
         7 = Quantity input (ge, trade, bank)
          */
-        return client.getVar(VarClientInt.INPUT_TYPE) == 7;
+        return client.getVarcIntValue(VarClientInt.INPUT_TYPE) == 7;
     }
 
     private int runExpression(String expression) {
@@ -132,7 +131,7 @@ class GECalcKeyHandler implements KeyListener {
 
     private void parseQuantity() {
         int calculatedValue = 0;
-        final String rawInput = client.getVar(VarClientStr.INPUT_TEXT);
+        final String rawInput = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
         // Remove spaces and force lowercase
         String sanitisedInput = rawInput.toLowerCase().replaceAll("\\s+", "");
 
@@ -152,12 +151,12 @@ class GECalcKeyHandler implements KeyListener {
         log.info(sanitisedInput + "=" + calculatedValue);
 
         // Set the value to the parsed value
-        client.setVar(VarClientStr.INPUT_TEXT, String.valueOf(calculatedValue));
+        client.setVarcStrValue(VarClientStr.INPUT_TEXT, String.valueOf(calculatedValue));
     }
 
     private void appendStringToValue(String toAppend, Boolean checkForMultiple) {
         // Take current input text and append a period (decimal)
-        final String currentValue = client.getVar(VarClientStr.INPUT_TEXT);
+        final String currentValue = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
         if (currentValue.equals("")) {
             return;
         }
@@ -165,7 +164,7 @@ class GECalcKeyHandler implements KeyListener {
             return;
         }
         String newValue = currentValue + toAppend;
-        client.setVar(VarClientStr.INPUT_TEXT, newValue);
+        client.setVarcStrValue(VarClientStr.INPUT_TEXT, newValue);
     }
 
     @Override
