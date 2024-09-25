@@ -1,7 +1,14 @@
 GE Calc ![Plugin Installs](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/gecalc) ![Plugin Rank](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/gecalc)
+
 ------
-| NOTE: This was a personal project, and probably won't receive any further updates. Feel free to fork and modify the repo.
+| ⚠ DISABLED ⚠️<br/>The plugin has been disabled in the RuneLite plugin-hub as multiple reports were received via Github and the RuneLite discord server that this plugin causes all in-game quantity input boxes to error following the Varlamore Part 2 update on 25th September 2024.<br/><br/>If you would like to contribute and fix the error, please submit a pull request and i'll be happy to pull into the plugin-hub.
 | --- |
+
+------
+| This was a personal project, and probably won't receive any further updates. Feel free to fork and modify the repo.
+| --- |
+
+
 
 A [Runelite](https://github.com/runelite/runelite) plugin that add the ability to use math/s to set price and quantity in the Grans Exchange window, and enabled the entry of decimal values when using the k, m, and b unit identifiers. See usage below.
 
@@ -29,14 +36,12 @@ This plugin also allows entering of decimal values followed by a unit:
 
 ![Value Entry](assets/entry.png "Value Entry")
 
-| NOTE: The Grand Exchange quantity and price input windows contain an asterisk '*' at the end of the text field. This is only visual and does not impact the result.
+| The Grand Exchange quantity and price input windows contain an asterisk '*' at the end of the text field. This is only visual and does not impact the result.
 | --- |
 
 Bugs & Requests
 -------
-If you do run into any bugs please [create an issue](https://github.com/cman8396/GECalc/issues/new). I am primarily a C# developer so be patient.
-
-If you have any requests please [create an issue](https://github.com/cman8396/GECalc/issues/new) and start the title with [Request].
+If you do run into any bugs please [create an issue](https://github.com/cman8396/GECalc/issues/new). I am an "anything but Java" developer so be patient.
 
 License
 -------
