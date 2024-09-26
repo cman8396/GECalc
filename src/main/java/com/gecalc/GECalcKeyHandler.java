@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
 import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
+import net.runelite.client.callback.ClientThread;
 import net.runelite.client.input.KeyListener;
 
 import javax.inject.Inject;
@@ -15,7 +16,10 @@ class GECalcKeyHandler implements KeyListener {
     @Inject
     private Client client;
 
-    public static boolean containsOperators(String inputString) {
+    @Inject
+    private ClientThread clientThread;
+
+    private static boolean containsOperators(String inputString) {
         // Quick check to see if entered value contains an operator
         if (inputString.contains("+"))
             return true;
@@ -29,7 +33,7 @@ class GECalcKeyHandler implements KeyListener {
         return false;
     }
 
-    private boolean isQuantityInput() {
+    public boolean isQuantityInput() {
         /*
         Figure out of user has entered a quantity into the GE quantity or price input.
         7 = Quantity input (ge, trade, bank)
@@ -42,11 +46,13 @@ class GECalcKeyHandler implements KeyListener {
         String[] operators = {"+", "-", "*", "/"};
         String foundOperator = "";
 
+        String sanitisedExpression = expression.replaceAll("\\.+", ".");
+        //log.info("GE Calc - Sanitised expression is " + sanitisedExpression);
+
         // Check for each operator for later use
         for (String operator : operators) {
-            if (expression.contains(operator)) {
-                // Replace * and + with x and p, because * and + cause the following error when used in .split() later
-                // java.util.regex.PatternSyntaxException: Dangling meta character
+            if (sanitisedExpression.contains(operator)) {
+                // Replace * and + because they throw when used in .split()
                 foundOperator = operator.replaceAll("\\*", "\\\\*").replaceAll("\\+", "\\\\+");
             }
         }
@@ -56,7 +62,7 @@ class GECalcKeyHandler implements KeyListener {
             try {
                 // Split input on operator to find left and right values
                 // Parse the values for K, M, or B usage
-                String[] sides = expression.split(foundOperator);
+                String[] sides = sanitisedExpression.split(foundOperator);
                 int left = convertKMBValue(sides[0]);
                 int right = convertKMBValue(sides[1]);
 
@@ -76,7 +82,7 @@ class GECalcKeyHandler implements KeyListener {
                         break;
                 }
 
-                //Get the ceiling of the result as the GE input dialog doesn't accept decimals
+                // Get the ceiling of the result as the GE input dialog doesn't accept decimals
                 return (int) Math.ceil(result);
 
             } catch (ArrayIndexOutOfBoundsException e) {
@@ -131,6 +137,7 @@ class GECalcKeyHandler implements KeyListener {
 
     private void parseQuantity() {
         int calculatedValue = 0;
+        // Get current chatbox quantity input value
         final String rawInput = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
         // Remove spaces and force lowercase
         String sanitisedInput = rawInput.toLowerCase().replaceAll("\\s+", "");
@@ -148,39 +155,67 @@ class GECalcKeyHandler implements KeyListener {
             e.printStackTrace();
         }
 
-        log.info(sanitisedInput + "=" + calculatedValue);
+        //log.info("GE Calc - Parsed value result: " + calculatedValue);
 
-        // Set the value to the parsed value
-        client.setVarcStrValue(VarClientStr.INPUT_TEXT, String.valueOf(calculatedValue));
+        // Set the value to the parsed value and run on client thread
+        int finalCalculatedValue = calculatedValue;
+        clientThread.invoke(() -> client.setVarcStrValue(VarClientStr.INPUT_TEXT, String.valueOf(finalCalculatedValue)));
     }
 
-    private void appendStringToValue(String toAppend, Boolean checkForMultiple) {
-        // Take current input text and append a period (decimal)
+    public void appendStringToValue(String toAppend) {
+        // Get current chatbox quantity input value
         final String currentValue = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
         if (currentValue.equals("")) {
             return;
         }
-        if (checkForMultiple && currentValue.contains(".")) {
-            return;
-        }
+
+        // Set the value to the current value with the appended character and run on client thread
         String newValue = currentValue + toAppend;
-        client.setVarcStrValue(VarClientStr.INPUT_TEXT, newValue);
+        clientThread.invoke(() -> client.setVarcStrValue(VarClientStr.INPUT_TEXT, newValue));
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        if (e.getKeyCode() == KeyEvent.VK_ENTER && isQuantityInput()) {
-            // Intercept quantity for parsing
-            parseQuantity();
-        } else if ((e.getKeyCode() == KeyEvent.VK_PERIOD || e.getKeyCode() == KeyEvent.VK_DECIMAL) && isQuantityInput()) {
-            // Override input for decimal point
-            appendStringToValue(".", true);
-        } else if ((e.getKeyCode() == 32) && isQuantityInput()) {
-            // Override input for space - for nice formatting
-            appendStringToValue(" ", false);
-        } else if ((e.getKeyCode() == 107 || e.getKeyCode() == 109 || e.getKeyCode() == 106 || e.getKeyCode() == 111) && isQuantityInput()) {
-            // Override input for operators + - * /
-            appendStringToValue(String.valueOf(e.getKeyChar()), false);
+        // Check if chatbox quantity input is open
+        if (isQuantityInput()) {
+            if (e.getKeyCode() == KeyEvent.VK_ENTER) {
+                // Intercept calculated quantity and parse
+                parseQuantity();
+            } else if (
+                    e.getKeyChar() == '+' ||
+                    e.getKeyChar() == '-' ||
+                    e.getKeyChar() == '*' ||
+                    e.getKeyChar() == 'k' ||
+                    e.getKeyChar() == 'm' ||
+                    e.getKeyChar() == 'b' ||
+                    e.getKeyChar() == 'K' ||
+                    e.getKeyChar() == 'M' ||
+                    e.getKeyChar() == 'B' ||
+                    e.getKeyChar() == '.' ||
+                    e.getKeyChar() == ' '
+            ) {
+                // Override input to add additional characters past the standard input limit of 10 characters.
+                // We don't need to check the length of the current chatbox value because the chatbox doesn't
+                // accept the above characters as standard so they get added anyway.
+                appendStringToValue(String.valueOf(e.getKeyChar()));
+            } else if (
+                    client.getVarcStrValue(VarClientStr.INPUT_TEXT).length() >= 10 &&
+                    (e.getKeyChar() == '1' ||
+                    e.getKeyChar() == '2' ||
+                    e.getKeyChar() == '3' ||
+                    e.getKeyChar() == '4' ||
+                    e.getKeyChar() == '5' ||
+                    e.getKeyChar() == '6' ||
+                    e.getKeyChar() == '7' ||
+                    e.getKeyChar() == '8' ||
+                    e.getKeyChar() == '9' ||
+                    e.getKeyChar() == '0')
+            ) {
+                // Override input to add additional characters past the standard input limit of 10 characters.
+                // Here we need to check the length of the current chatbox value because if we don't and the length
+                // is less than 10 it adds the value twice :(
+                appendStringToValue(String.valueOf(e.getKeyChar()));
+            }
         }
     }
 
