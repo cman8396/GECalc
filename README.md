@@ -1,16 +1,14 @@
 GE Calc ![Plugin Installs](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/installs/plugin/gecalc) ![Plugin Rank](https://img.shields.io/endpoint?url=https://i.pluginhub.info/shields/rank/plugin/gecalc)
 
 ------
-| ⚠ DISABLED ⚠️<br/>The plugin has been disabled in the RuneLite plugin-hub as multiple reports were received via Github and the RuneLite discord server that this plugin causes all in-game quantity input boxes to error following the Varlamore Part 2 update on 25th September 2024.<br/><br/>If you would like to contribute and fix the error, please submit a pull request and i'll be happy to pull into the plugin-hub.
-| --- |
-
-------
-| This was a personal project, and probably won't receive any further updates. Feel free to fork and modify the repo.
+| This is a personal project, and probably won't receive any major feature updates.
 | --- |
 
 
 
 A [Runelite](https://github.com/runelite/runelite) plugin that add the ability to use math/s to set price and quantity in the Grans Exchange window, and enabled the entry of decimal values when using the k, m, and b unit identifiers. See usage below.
+
+As of version 1.2 the plugin now supports more complex expressions, such as '13.8k * 11.3k' for a result of 25100.
 
 Usage
 ------
