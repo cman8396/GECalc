@@ -185,6 +185,7 @@ class GECalcKeyHandler implements KeyListener {
                     e.getKeyChar() == '+' ||
                     e.getKeyChar() == '-' ||
                     e.getKeyChar() == '*' ||
+                    e.getKeyChar() == '/' ||
                     e.getKeyChar() == 'k' ||
                     e.getKeyChar() == 'm' ||
                     e.getKeyChar() == 'b' ||
