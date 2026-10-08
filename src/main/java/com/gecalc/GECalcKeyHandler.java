@@ -2,6 +2,7 @@ package com.gecalc;
 
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
+import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
 import net.runelite.api.gameval.VarClientID;
 import net.runelite.client.callback.ClientThread;
@@ -43,7 +44,7 @@ class GECalcKeyHandler implements KeyListener {
          */
 
         // log.debug("VarClientID.MESLAYERMODE - {}", client.getVarcIntValue(VarClientID.MESLAYERMODE));
-        return client.getVarcIntValue(VarClientID.MESLAYERINPUT) == 7 || client.getVarcIntValue(VarClientID.MESLAYERINPUT) == 30;
+        return client.getVarcIntValue(VarClientID.MESLAYERMODE) == 7 || client.getVarcIntValue(VarClientID.MESLAYERMODE) == 30;
     }
 
     private int runExpression(String expression) {
@@ -143,7 +144,7 @@ class GECalcKeyHandler implements KeyListener {
     private void parseQuantity() {
         int calculatedValue = 0;
         // Get current chatbox quantity input value
-        final String rawInput = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
+        final String rawInput = client.getVarcStrValue(VarClientID.MESLAYERINPUT);
         // Remove spaces and force lowercase
         String sanitisedInput = rawInput.toLowerCase().replaceAll("\\s+", "");
 
@@ -164,19 +165,19 @@ class GECalcKeyHandler implements KeyListener {
 
         // Set the value to the parsed value and run on client thread
         int finalCalculatedValue = calculatedValue;
-        clientThread.invoke(() -> client.setVarcStrValue(VarClientStr.INPUT_TEXT, String.valueOf(finalCalculatedValue)));
+        clientThread.invoke(() -> client.setVarcStrValue(VarClientID.MESLAYERINPUT, String.valueOf(finalCalculatedValue)));
     }
 
     public void appendStringToValue(String toAppend) {
         // Get current chatbox quantity input value
-        final String currentValue = client.getVarcStrValue(VarClientStr.INPUT_TEXT);
+        final String currentValue = client.getVarcStrValue(VarClientID.MESLAYERINPUT);
         if (currentValue.equals("")) {
             return;
         }
 
         // Set the value to the current value with the appended character and run on client thread
         String newValue = currentValue + toAppend;
-        clientThread.invoke(() -> client.setVarcStrValue(VarClientStr.INPUT_TEXT, newValue));
+        clientThread.invoke(() -> client.setVarcStrValue(VarClientID.MESLAYERINPUT, newValue));
     }
 
     @Override
@@ -205,7 +206,7 @@ class GECalcKeyHandler implements KeyListener {
                 // accept the above characters as standard so they get added anyway.
                 appendStringToValue(String.valueOf(e.getKeyChar()));
             } else if (
-                    client.getVarcStrValue(VarClientStr.INPUT_TEXT).length() >= 10 &&
+                    client.getVarcStrValue(VarClientID.MESLAYERINPUT).length() >= 10 &&
                     (e.getKeyChar() == '1' ||
                     e.getKeyChar() == '2' ||
                     e.getKeyChar() == '3' ||
