@@ -11,7 +11,7 @@ import net.runelite.client.plugins.PluginDescriptor;
 @PluginDescriptor
 (
         name = "GE Calc",
-        description = "Use maths to set price and quantity in GE!",
+        description = "Use math to set price and quantity in GE and bank!",
         tags = {"ge", "grand", "exchange", "price", "prices", "math", "maths", "calc", "calculator"}
 )
 public class GECalcPlugin extends Plugin
