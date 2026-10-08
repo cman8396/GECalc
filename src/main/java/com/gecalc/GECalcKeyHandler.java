@@ -35,7 +35,7 @@ class GECalcKeyHandler implements KeyListener {
 
     public boolean isQuantityInput() {
         /*
-        Figure out of user has entered a quantity into the GE quantity or price input.
+        Figure out if user has entered a quantity into the GE quantity or price input.
         7 = Quantity input (ge, trade, bank)
          */
         return client.getVarcIntValue(VarClientInt.INPUT_TYPE) == 7;
