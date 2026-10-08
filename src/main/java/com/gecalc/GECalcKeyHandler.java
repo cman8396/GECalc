@@ -1,10 +1,9 @@
 package com.gecalc;
 
-
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Client;
-import net.runelite.api.VarClientInt;
 import net.runelite.api.VarClientStr;
+import net.runelite.api.gameval.VarClientID;
 import net.runelite.client.callback.ClientThread;
 import net.runelite.client.input.KeyListener;
 
@@ -35,10 +34,12 @@ class GECalcKeyHandler implements KeyListener {
 
     public boolean isQuantityInput() {
         /*
-        Figure out if user has entered a quantity into the GE quantity or price input.
-        7 = Quantity input (ge, trade, bank)
+            Figure out if user has entered a quantity into the GE quantity or price input.
+            7 = Quantity input (GE, banks, trades)
          */
-        return client.getVarcIntValue(VarClientInt.INPUT_TYPE) == 7;
+
+        // log.debug("VarClientID.MESLAYERMODE - {}", client.getVarcIntValue(VarClientID.MESLAYERMODE));
+        return client.getVarcIntValue(VarClientID.MESLAYERINPUT) == 7;
     }
 
     private int runExpression(String expression) {
@@ -47,7 +48,7 @@ class GECalcKeyHandler implements KeyListener {
         String foundOperator = "";
 
         String sanitisedExpression = expression.replaceAll("\\.+", ".");
-        //log.info("GE Calc - Sanitised expression is " + sanitisedExpression);
+        // log.debug("GE Calc - Sanitised expression is {}", sanitisedExpression);
 
         // Check for each operator for later use
         for (String operator : operators) {
@@ -155,7 +156,7 @@ class GECalcKeyHandler implements KeyListener {
             e.printStackTrace();
         }
 
-        //log.info("GE Calc - Parsed value result: " + calculatedValue);
+        // log.debug("GE Calc - Parsed value result: {}", calculatedValue);
 
         // Set the value to the parsed value and run on client thread
         int finalCalculatedValue = calculatedValue;
