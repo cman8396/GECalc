@@ -36,10 +36,14 @@ class GECalcKeyHandler implements KeyListener {
         /*
             Figure out if user has entered a quantity into the GE quantity or price input.
             7 = Quantity input (GE, banks, trades)
+            30 = GE price input
+
+            Since "GE Improvements: Beyond Max Cash" update on 30 Sep 2026 the GE price
+            input field now has a different ID, I assume this is because it goes to 2.147t
          */
 
         // log.debug("VarClientID.MESLAYERMODE - {}", client.getVarcIntValue(VarClientID.MESLAYERMODE));
-        return client.getVarcIntValue(VarClientID.MESLAYERINPUT) == 7;
+        return client.getVarcIntValue(VarClientID.MESLAYERINPUT) == 7 || client.getVarcIntValue(VarClientID.MESLAYERINPUT) == 30;
     }
 
     private int runExpression(String expression) {
