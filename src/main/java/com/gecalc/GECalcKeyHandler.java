@@ -50,7 +50,7 @@ class GECalcKeyHandler implements KeyListener {
     }
 
     private long runExpression(String expression) {
-        BigDecimal result = new BigDecimal(0);
+        BigDecimal expressionResult = new BigDecimal(0);
         String[] operators = {"+", "-", "*", "/"};
         String foundOperator = "";
 
@@ -71,30 +71,30 @@ class GECalcKeyHandler implements KeyListener {
                 // Split input on operator to find left and right values
                 // Parse the values for K, M, or B usage
                 String[] sides = sanitisedExpression.split(foundOperator);
-                BigDecimal left = convertKMBValue(sides[0]);
-                BigDecimal right = convertKMBValue(sides[1]);
+                BigDecimal left = convertKMBTValue(sides[0]);
+                BigDecimal right = convertKMBTValue(sides[1]);
 
                 // Perform the expression
                 switch (foundOperator) {
                     case "\\+":
-                        result = left.add(right);
+                        expressionResult = left.add(right);
                         break;
                     case "-":
-                        result = left.subtract(right);
+                        expressionResult = left.subtract(right);
                         break;
                     case "\\*":
-                        result = left.multiply(right);
+                        expressionResult = left.multiply(right);
                         break;
                     case "/":
-                        result = left.divide(right, RoundingMode.CEILING);
+                        expressionResult = left.divide(right, RoundingMode.CEILING);
                         break;
                 }
 
                 // Get the ceiling of the result as the GE input dialog doesn't accept decimals
-                return result.longValue();
+                return expressionResult.longValue();
 
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
-                e.printStackTrace();
+            } catch (Exception e) {
+                log.warn("Error when running entered expression '{}'", expressionResult, e);
                 return 1;
             }
         }
@@ -103,47 +103,46 @@ class GECalcKeyHandler implements KeyListener {
         return 1;
     }
 
-    private BigDecimal convertKMBValue(String sanitisedInput) {
-        // Check that the entered value is in the correct format 0 || 0.0 with trailing k, m, b or t
-        if (sanitisedInput.matches("[0-9]+\\.[0-9]+[kmbt]") || sanitisedInput.matches("[0-9]+[kmbt]")) {
-            // Get which unit the user ended the value with, k, m, b or t
-            char foundUnit = sanitisedInput.charAt(sanitisedInput.length() - 1);
-            // Get the numerical value of the entered value, no k, m, b or t
-            BigDecimal amountEntered = new BigDecimal(sanitisedInput.substring(0, sanitisedInput.length() - 1));
-            // Multiply the entered value by the unit
-            BigDecimal newAmount;
-            switch (foundUnit) {
-                case 'k':
-                    newAmount = amountEntered.multiply(BigDecimal.valueOf(1000));
-                    break;
-                case 'm':
-                    newAmount = amountEntered.multiply(BigDecimal.valueOf(1000000));
-                    break;
-                case 'b':
-                    newAmount = amountEntered.multiply(BigDecimal.valueOf(1000000000));
-                    break;
-                case 't':
-                    newAmount = amountEntered.multiply(BigDecimal.valueOf(1000000000000L));
-                    break;
-                default:
-                    newAmount = BigDecimal.valueOf(0);
-                    break;
-            }
-
-            return newAmount;
-        }
-
-        // If the format of the entered value doesn't contain a unit, remove all dots
+    private BigDecimal convertKMBTValue(String sanitisedInput) {
         try {
-            return new BigDecimal(sanitisedInput);
-        } catch (NumberFormatException e) {
-            e.printStackTrace();
+            // Check that the entered value is in the correct format 0 || 0.0 with trailing k, m, b or t
+            if (sanitisedInput.matches("[0-9]+\\.[0-9]+[kmbt]") || sanitisedInput.matches("[0-9]+[kmbt]")) {
+                // Get which unit the user ended the value with, k, m, b or t
+                char foundUnit = sanitisedInput.charAt(sanitisedInput.length() - 1);
+                // Get the numerical value of the entered value, no k, m, b or t
+                BigDecimal amountEntered = new BigDecimal(sanitisedInput.substring(0, sanitisedInput.length() - 1));
+                // Multiply the entered value by the unit
+                BigDecimal amountMultiplied;
+                switch (foundUnit) {
+                    case 'k':
+                        amountMultiplied = amountEntered.multiply(BigDecimal.valueOf(1000));
+                        break;
+                    case 'm':
+                        amountMultiplied = amountEntered.multiply(BigDecimal.valueOf(1000000));
+                        break;
+                    case 'b':
+                        amountMultiplied = amountEntered.multiply(BigDecimal.valueOf(1000000000));
+                        break;
+                    case 't':
+                        amountMultiplied = amountEntered.multiply(BigDecimal.valueOf(1000000000000L));
+                        break;
+                    default:
+                        amountMultiplied = BigDecimal.valueOf(0);
+                        break;
+                }
+
+                return amountMultiplied;
+            } else {
+                return new BigDecimal(sanitisedInput);
+            }
+        } catch (Exception e) {
+            log.warn("Error converting entered value '{}'", sanitisedInput, e);
         }
 
         return BigDecimal.valueOf(1);
     }
 
-    private void parseQuantity() {
+    private void parseEnteredValue() {
         long calculatedValue = 0;
         // Get current chatbox quantity input value
         final String rawInput = client.getVarcStrValue(VarClientID.MESLAYERINPUT);
@@ -157,10 +156,10 @@ class GECalcKeyHandler implements KeyListener {
                 calculatedValue = runExpression(sanitisedInput);
             } else {
                 // Try and parse the entered unit k, m, b or t
-                calculatedValue = convertKMBValue(sanitisedInput).longValue();
+                calculatedValue = convertKMBTValue(sanitisedInput).longValue();
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("Error parsing entered value '{}'", sanitisedInput, e);
         }
 
         // log.debug("GE Calc - Parsed value result: {}", calculatedValue);
@@ -189,22 +188,22 @@ class GECalcKeyHandler implements KeyListener {
         if (isQuantityInput()) {
             if (e.getKeyCode() == KeyEvent.VK_ENTER) {
                 // Intercept calculated quantity and parse
-                parseQuantity();
+                parseEnteredValue();
             } else if (
                     e.getKeyChar() == '+' ||
-                    e.getKeyChar() == '-' ||
-                    e.getKeyChar() == '*' ||
-                    e.getKeyChar() == '/' ||
-                    e.getKeyChar() == 'k' ||
-                    e.getKeyChar() == 'm' ||
-                    e.getKeyChar() == 'b' ||
-                    e.getKeyChar() == 't' ||
-                    e.getKeyChar() == 'K' ||
-                    e.getKeyChar() == 'M' ||
-                    e.getKeyChar() == 'B' ||
-                    e.getKeyChar() == 'T' ||
-                    e.getKeyChar() == '.' ||
-                    e.getKeyChar() == ' '
+                            e.getKeyChar() == '-' ||
+                            e.getKeyChar() == '*' ||
+                            e.getKeyChar() == '/' ||
+                            e.getKeyChar() == 'k' ||
+                            e.getKeyChar() == 'm' ||
+                            e.getKeyChar() == 'b' ||
+                            e.getKeyChar() == 't' ||
+                            e.getKeyChar() == 'K' ||
+                            e.getKeyChar() == 'M' ||
+                            e.getKeyChar() == 'B' ||
+                            e.getKeyChar() == 'T' ||
+                            e.getKeyChar() == '.' ||
+                            e.getKeyChar() == ' '
             ) {
                 // Override input to add additional characters past the standard input limit of 19 characters.
                 // We don't need to check the length of the current chatbox value because the chatbox doesn't
@@ -212,16 +211,16 @@ class GECalcKeyHandler implements KeyListener {
                 appendStringToValue(String.valueOf(e.getKeyChar()));
             } else if (
                     client.getVarcStrValue(VarClientID.MESLAYERINPUT).length() >= 19 &&
-                    (e.getKeyChar() == '1' ||
-                    e.getKeyChar() == '2' ||
-                    e.getKeyChar() == '3' ||
-                    e.getKeyChar() == '4' ||
-                    e.getKeyChar() == '5' ||
-                    e.getKeyChar() == '6' ||
-                    e.getKeyChar() == '7' ||
-                    e.getKeyChar() == '8' ||
-                    e.getKeyChar() == '9' ||
-                    e.getKeyChar() == '0')
+                            (e.getKeyChar() == '1' ||
+                                    e.getKeyChar() == '2' ||
+                                    e.getKeyChar() == '3' ||
+                                    e.getKeyChar() == '4' ||
+                                    e.getKeyChar() == '5' ||
+                                    e.getKeyChar() == '6' ||
+                                    e.getKeyChar() == '7' ||
+                                    e.getKeyChar() == '8' ||
+                                    e.getKeyChar() == '9' ||
+                                    e.getKeyChar() == '0')
             ) {
                 // Override input to add additional characters past the standard input limit of 19 characters.
                 // Here we need to check the length of the current chatbox value because if we don't and the length

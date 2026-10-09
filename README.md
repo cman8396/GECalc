@@ -1,20 +1,11 @@
 # GE Calc
 
-A [Runelite](https://github.com/runelite/runelite) plugin that add the ability to use math/s to set price and quantity
+A [RuneLite](https://github.com/runelite/runelite) plugin that add the ability to use math/s to set price and quantity
 in the Grand Exchange and Bank windows and allows the entry of decimal values when using the `k`, `m`, `b` and `t` unit
 identifiers. See [Usage](#usage) and [Examples](#examples) below.
 
 | This is a personal project and it probably won't receive any major feature updates. But I try to fix things when they break. |
 |------------------------------------------------------------------------------------------------------------------------------|
-
-------
-
-## Changelog
-
-| Version | Description                                                                                                                                                                                                                           |
-|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| 1.3.0   | Fixes for [GE Improvements: Beyond Max Cash](https://oldschool.runescape.wiki/w/Update:GE_Improvements:_Beyond_Max_Cash) update:<br/> <li>Fix for new GE price entry window.</li><li>Added support for new `t` (trillions) unit.</li> |
-| 1.2.x   | Now supports more complex expressions, such as `13.8k + 11.3k` for a result of `25100`.                                                                                                                                               |
 
 ------
 
@@ -49,7 +40,8 @@ You can use decimals with units, expressions, or both at the same time:
 
 _The plugin only supports one operator at a time, so expressions like `1.4m * 2 / 200k` won't work._
 
-_If the result of a calculation is greater than the new max cash value, the maximum possible value (2,149,631,130,647) is used._
+_If the result of a calculation is greater than the new max cash value, the maximum possible value (2,149,631,130,647)
+is used._
 
 ------
 
@@ -58,6 +50,16 @@ _If the result of a calculation is greater than the new max cash value, the maxi
 If you do run into any bugs, find any issues, or want to request any changes or additions,
 please [create an issue](https://github.com/cman8396/GECalc/issues/new). I am an "anything
 but Java" developer so be patient.
+
+------
+
+## Changelog
+
+| Version | Description                                                                                                                                                                                                                           |
+|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 1.3.1   | Fixed error logging following RuneLite plugin review.                                                                                                                                                                                 |
+| 1.3.0   | Fixes for [GE Improvements: Beyond Max Cash](https://oldschool.runescape.wiki/w/Update:GE_Improvements:_Beyond_Max_Cash) update:<br/> <li>Fix for new GE price entry window.</li><li>Added support for new `t` (trillions) unit.</li> |
+| 1.2.x   | Now supports more complex expressions, such as `13.8k + 11.3k` for a result of `25100`.                                                                                                                                               |
 
 ------
 
